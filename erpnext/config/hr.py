@@ -209,6 +209,12 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "Attendance Report",
+					"doctype": "Attendance"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Employee Leave Balance",
 					"doctype": "Leave Application"
 				},

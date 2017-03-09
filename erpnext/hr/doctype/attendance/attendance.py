@@ -12,12 +12,10 @@ from erpnext.hr.utils import set_employee_name
 class Attendance(Document):
 	def validate_duplicate_record(self):
 		res = frappe.db.sql("""select name from `tabAttendance` where employee = %s and att_date = %s
-			and name != %s and docstatus = 1""",
+			and name != %s and docstatus < 2""",
 			(self.employee, self.att_date, self.name))
 		if res:
-			frappe.throw(_("Attendance for employee {0} is already marked").format(self.employee))
-
-		set_employee_name(self)
+			frappe.throw(_("Attendance for employee {0} on {1} is already marked").format(self.employee_name, self.att_date))
 
 	def check_leave_record(self):
 		if self.status == 'Present':
@@ -39,11 +37,17 @@ class Attendance(Document):
 		if not emp:
 			frappe.throw(_("Employee {0} is not active or does not exist").format(self.employee))
 
+	def validate_in_out_time(self):
+		if (self.swipe_in_time > self.swipe_out_time):
+			frappe.throw(_("In Time cannot be greater than Out Time."))
+			
 	def validate(self):
 		from erpnext.controllers.status_updater import validate_status
 		validate_status(self.status, ["Present", "Absent", "Half Day"])
 		self.validate_att_date()
+		set_employee_name(self)
 		self.validate_duplicate_record()
+		self.validate_in_out_time()
 		self.check_leave_record()
 
 	def on_update(self):

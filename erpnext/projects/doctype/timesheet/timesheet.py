@@ -9,7 +9,7 @@ from frappe import _
 import json
 from datetime import timedelta
 from erpnext.controllers.queries import get_match_cond
-from frappe.utils import flt, time_diff_in_hours, get_datetime, getdate, cint, get_datetime_str
+from frappe.utils import flt, time_diff_in_hours, get_datetime, getdate, cint, get_datetime_str, nowdate, nowtime, to_timedelta
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from erpnext.manufacturing.doctype.workstation.workstation import (check_if_within_operating_hours,
@@ -20,16 +20,45 @@ class OverlapError(frappe.ValidationError): pass
 class OverProductionLoggedError(frappe.ValidationError): pass
 
 class Timesheet(Document):
+	def validate_duplicate_record(self):
+		res = frappe.db.sql("""select name from `tabTimesheet` where employee = %s and timesheet_date = %s
+			and name != %s and docstatus < 2""",
+			(self.employee, self.timesheet_date, self.name))
+		if res:
+			frappe.throw(_("Timesheet for employee {0} on {1} already exists in the system.").format(self.employee_name, self.timesheet_date))
+
+	def validate_time_against_attendance(self):
+		res = frappe.db.sql("""select swipe_in_time, swipe_out_time from `tabAttendance` where employee = %s and att_date = %s and docstatus < 2""",
+							(self.employee, self.timesheet_date), as_dict=True)
+		if not res:
+			frappe.throw(_("Attendance data for employee {0} on {1} does not exists in the system, hence cannot save this timesheet.").format(self.employee_name, self.timesheet_date))
+			
+		swipe_in_time = res[0].swipe_in_time
+		swipe_out_time = res[0].swipe_out_time
+		
+		today = nowdate()
+		if swipe_in_time == swipe_out_time and getdate(self.timesheet_date) == getdate(today):
+			swipe_out_time = nowtime()
+			
+		total_attendance_hours = round(float((to_timedelta(swipe_out_time) - to_timedelta(swipe_in_time)).total_seconds()) / 3600, 2)
+		total_timesheet_hours = self.total_hours
+		
+		if (total_timesheet_hours > total_attendance_hours):
+			frappe.throw(_("Total hours entered against all activities for {0} is greater than your Total working hours for the day.").format(self.timesheet_date))
+		
+	
 	def onload(self):
 		self.get("__onload").maintain_bill_work_hours_same = frappe.db.get_single_value('HR Settings', 'maintain_bill_work_hours_same')
 
 	def validate(self):
 		self.set_employee_name()
+		self.validate_duplicate_record()
 		self.set_status()
 		self.validate_dates()
 		self.validate_time_logs()
 		self.update_cost()
 		self.calculate_total_amounts()
+		self.validate_time_against_attendance()
 		self.calculate_percentage_billed()
 		self.set_dates()
 

@@ -15,7 +15,7 @@ $(document).bind('toolbar_setup', function() {
 			frappe.urllib.get_base_url()+'/assets/erpnext/images/erp-icon.svg" />');
 
 	$('[data-link="docs"]').attr("href", "https://frappe.github.io/erpnext/")
-	$('[data-link="issues"]').attr("href", "https://github.com/frappe/erpnext/issues")
+	$('[data-link="issues"]').attr("href", "https://github.com/bpshetty/erpnext/issues")
 
 
 	// default documentation goes to erpnext
@@ -28,7 +28,7 @@ $(document).bind('toolbar_setup', function() {
 		target="_blank">'+__('User Forum')+'</a></li>').insertBefore($help_menu);
 	$('<li><a href="https://gitter.im/frappe/erpnext" \
 		target="_blank">'+__('Chat')+'</a></li>').insertBefore($help_menu);
-	$('<li><a href="https://github.com/frappe/erpnext/issues" \
+	$('<li><a href="https://github.com/bpshetty/erpnext/issues" \
 		target="_blank">'+__('Report an Issue')+'</a></li>').insertBefore($help_menu);
 
 });

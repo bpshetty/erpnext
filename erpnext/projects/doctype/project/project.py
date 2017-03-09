@@ -181,9 +181,14 @@ class Project(Document):
 				user.welcome_email_sent=1
 
 	def on_update(self):
+		self.update_user_permissions()
 		self.load_tasks()
 		self.sync_tasks()
 
+	def update_user_permissions(self):
+		for user in self.users:
+			frappe.permissions.add_user_permission("Project", self.name, user.user)
+		
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
 	return dict(frappe.db.sql('''select unix_timestamp(from_time), count(*)

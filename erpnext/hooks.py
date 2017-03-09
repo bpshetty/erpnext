@@ -10,7 +10,7 @@ app_icon = "fa fa-th"
 app_color = "#e74c3c"
 app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
-source_link = "https://github.com/frappe/erpnext"
+source_link = "https://github.com/bpshetty/erpnext"
 
 error_report_email = "support@erpnext.com"
 
@@ -45,7 +45,7 @@ calendars = ["Task", "Production Order", "Leave Application", "Sales Order", "Ho
 
 fixtures = ["Web Form"]
 
-website_generators = ["Item Group", "Item", "Sales Partner", "Job Opening", "Student Admission"]
+website_generators = ["Item Group", "Item", "Sales Partner", "Job Opening"]
 
 website_context = {
 	"favicon": 	"/assets/erpnext/images/favicon.png",
@@ -96,7 +96,6 @@ website_route_rules = [
 		}
 	},
 	{"from_route": "/jobs", "to_route": "Job Opening"},
-	{"from_route": "/admissions", "to_route": "Student Admission"},
 ]
 
 portal_menu_items = [
@@ -108,18 +107,14 @@ portal_menu_items = [
 	{"title": _("Shipments"), "route": "/shipments", "reference_doctype": "Delivery Note", "role":"Customer"},
 	{"title": _("Issues"), "route": "/issues", "reference_doctype": "Issue", "role":"Customer"},
 	{"title": _("Addresses"), "route": "/addresses", "reference_doctype": "Address"},
-	{"title": _("Announcements"), "route": "/announcement", "reference_doctype": "Announcement"},
-	{"title": _("Courses"), "route": "/course", "reference_doctype": "Course", "role":"Student"},
-	{"title": _("Assessment Schedule"), "route": "/assessment", "reference_doctype": "Assessment", "role":"Student"},
-	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees", "role":"Student"}
+	{"title": _("Announcements"), "route": "/announcement", "reference_doctype": "Announcement"}
 ]
 
 default_roles = [
 	{'role': 'Customer', 'doctype':'Contact', 'email_field': 'email_id',
 		'filters': {'ifnull(customer, "")': ('!=', '')}},
 	{'role': 'Supplier', 'doctype':'Contact', 'email_field': 'email_id',
-		'filters': {'ifnull(supplier, "")': ('!=', '')}},
-	{'role': 'Student', 'doctype':'Student', 'email_field': 'student_email_id'}
+		'filters': {'ifnull(supplier, "")': ('!=', '')}}
 ]
 
 has_website_permission = {
@@ -128,8 +123,7 @@ has_website_permission = {
 	"Supplier Quotation": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Delivery Note": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission",
-	"Address": "erpnext.utilities.doctype.address.address.has_website_permission",
-	"Discussion": "erpnext.schools.web_form.discussion.discussion.has_website_permission"
+	"Address": "erpnext.utilities.doctype.address.address.has_website_permission"
 }
 
 permission_query_conditions = {

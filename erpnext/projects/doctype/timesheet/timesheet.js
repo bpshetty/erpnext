@@ -35,10 +35,11 @@ frappe.ui.form.on("Timesheet", {
 		if (frm.doc.__islocal && frm.doc.time_logs) {
 			calculate_time_and_amount(frm);
 		}
+		if(frm.doc.__islocal) cur_frm.set_value("timesheet_date", get_today());
 	},
 
 	refresh: function(frm) {
-		if(frm.doc.docstatus==1) {
+		/*if(frm.doc.docstatus==1) {
 			if(frm.doc.per_billed < 100){
 				frm.add_custom_button(__("Make Sales Invoice"), function() { frm.trigger("make_invoice") },
 					"fa fa-file-alt");
@@ -48,7 +49,7 @@ frappe.ui.form.on("Timesheet", {
 				frm.add_custom_button(__("Make Salary Slip"), function() { frm.trigger("make_salary_slip") },
 					"fa fa-file-alt");
 			}
-		}
+		}*/
 
 		if(frm.doc.per_billed > 0) {
 			cur_frm.fields_dict["time_logs"].grid.toggle_enable("billing_hours", false);
@@ -89,7 +90,8 @@ frappe.ui.form.on("Timesheet Detail", {
 	},
 
 	hours: function(frm, cdt, cdn) {
-		calculate_end_time(frm, cdt, cdn)
+		// calculate_end_time(frm, cdt, cdn)
+		calculate_time_and_amount(frm)
 	},
 
 	billing_hours: function(frm, cdt, cdn) {
