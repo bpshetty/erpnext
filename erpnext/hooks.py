@@ -106,8 +106,7 @@ portal_menu_items = [
 	{"title": _("Invoices"), "route": "/invoices", "reference_doctype": "Sales Invoice", "role":"Customer"},
 	{"title": _("Shipments"), "route": "/shipments", "reference_doctype": "Delivery Note", "role":"Customer"},
 	{"title": _("Issues"), "route": "/issues", "reference_doctype": "Issue", "role":"Customer"},
-	{"title": _("Addresses"), "route": "/addresses", "reference_doctype": "Address"},
-	{"title": _("Announcements"), "route": "/announcement", "reference_doctype": "Announcement"}
+	{"title": _("Addresses"), "route": "/addresses", "reference_doctype": "Address"}
 ]
 
 default_roles = [
