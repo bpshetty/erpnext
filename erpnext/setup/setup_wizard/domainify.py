@@ -57,14 +57,6 @@ def get_domain(domain):
 			],
 			'default_portal_role': 'Customer'
 		},
-		'Education': {
-			'desktop_icons': ['Student', 'Program', 'Course', 'Student Group', 'Instructor',
-				'Fees',  'ToDo', 'Schools'],
-			'allow_roles': ['Academics User', 'Accounts User', 'Accounts Manager', 'Item Manager',
-				'Website Manager', 'HR User', 'HR Manager', 'Purchase User', 'Purchase Manager',
-				'Student'],
-			'default_portal_role': 'Student'
-		},
 	}
 	if not domain in data:
 		raise 'Invalid Domain {0}'.format(domain)

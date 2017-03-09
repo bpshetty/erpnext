@@ -36,14 +36,6 @@ def setup_complete(args=None):
 	create_customers(args)
 	create_suppliers(args)
 
-	if args.domain.lower() == 'education':
-		create_academic_year()
-		create_academic_term()
-		create_program(args)
-		create_course(args)
-		create_instructor(args)
-		create_room(args)
-
 	if args.get('setup_website'):
 		website_maker(args)
 

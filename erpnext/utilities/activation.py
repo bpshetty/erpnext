@@ -34,15 +34,6 @@ def get_level():
 	if frappe.db.count('User') > 5:
 		activation_level += 1
 
-	if frappe.db.count('Student') > 5:
-		activation_level += 1
-
-	if frappe.db.count('Student Batch') > 5:
-		activation_level += 1
-
-	if frappe.db.count('Instructor') > 5:
-		activation_level += 1
-
 	# recent login
 	if frappe.db.sql('select name from tabUser where last_login > date_sub(now(), interval 2 day) limit 1'):
 		activation_level += 1
@@ -112,24 +103,6 @@ def get_help_messages():
 			route='List/Timesheet',
 			domain=('Services',),
 			target=5
-		),
-		frappe._dict(
-			doctype='Student',
-			title=_('Add Students'),
-			description=_('Students are at the heart of the system, add all your students'),
-			action=_('Make Student'),
-			route='List/Student',
-			domain=('Education',),
-			target=5
-		),
-		frappe._dict(
-			doctype='Student Batch',
-			title=_('Group your students in batches'),
-			description=_('Student Batches help you track attendance, assessments and fees for students'),
-			action=_('Make Student Batch'),
-			route='List/Student Batch',
-			domain=('Education',),
-			target=3
 		),
 		frappe._dict(
 			doctype='Employee',
