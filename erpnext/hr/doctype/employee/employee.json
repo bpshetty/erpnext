@@ -2252,7 +2252,7 @@
  "permissions": [
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 
@@ -2268,7 +2268,8 @@
    "role": "Employee", 
    "set_user_permissions": 0, 
    "share": 0, 
-   "submit": 0, 
+   "submit": 0,
+   "user_permission_doctypes": "[\"Employee\"]",   
    "write": 0
   }, 
   {
@@ -2276,7 +2277,7 @@
    "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 1, 
-   "delete": 1, 
+   "delete": 0, 
    "email": 1, 
    "export": 0, 
    "if_owner": 0, 
@@ -2298,7 +2299,7 @@
    "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 1, 
-   "delete": 1, 
+   "delete": 0, 
    "email": 1, 
    "export": 0, 
    "if_owner": 0, 

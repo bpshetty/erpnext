@@ -1753,7 +1753,7 @@
    "print": 0, 
    "read": 1, 
    "report": 0, 
-   "role": "Projects User", 
+   "role": "Projects Manager", 
    "set_user_permissions": 0, 
    "share": 0, 
    "submit": 0, 
