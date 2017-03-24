@@ -6,6 +6,7 @@ import frappe
 from frappe.utils import cstr, cint, getdate
 from frappe import msgprint, _
 from calendar import monthrange
+from datetime import date
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -13,44 +14,65 @@ def execute(filters=None):
 	conditions, filters = get_conditions(filters)
 	columns = get_columns(filters)
 	att_map = get_attendance_list(conditions, filters)
-	emp_map = get_employee_details()
-
+	emp_map = get_employee_details(filters)
+	holidays_list = get_holidays(filters)
+	
 	data = []
-	for emp in sorted(att_map):
+	for emp in sorted(emp_map):
 		emp_det = emp_map.get(emp)
-		if not emp_det:
-			continue
-
-		row = [emp, emp_det.employee_name, emp_det.branch, emp_det.department, emp_det.designation,
-			emp_det.company]
-
+		att_det = att_map.get(emp)
+		
+		row = [emp, emp_det.employee_name, emp_det.date_of_joining]
+		
+		date_of_joining = emp_det.date_of_joining
+		relieving_date = emp_det.relieving_date
+		today = getdate()
+		
 		total_p = total_a = 0.0
 		for day in range(filters["total_days_in_month"]):
-			status = att_map.get(emp).get(day + 1, "None")
-			status_map = {"Present": "P", "Absent": "A", "Half Day": "H", "None": ""}
-			row.append(status_map[status])
+			dateassessed = date(cint(filters.year), filters.month, day + 1)
+			
+			if (dateassessed > today):
+				break
+				
+			if ((date_of_joining and dateassessed < date_of_joining) or (relieving_date and dateassessed > relieving_date)):
+				row.append("")
+			elif not att_det:
+				if (dateassessed in holidays_list):
+					row.append("HL")
+				else:
+					total_a += 1
+					row.append("A")
+			else:
+				status = att_det.get(day + 1, "Absent")
+				status_map = {"Present": "P", "Absent": "A", "Half Day": "H"}
+				row.append(status_map[status])
 
-			if status == "Present":
-				total_p += 1
-			elif status == "Absent":
-				total_a += 1
-			elif status == "Half Day":
-				total_p += 0.5
-				total_a += 0.5
-
+				if status == "Present":
+					total_p += 1
+				elif status == "Absent":
+					total_a += 1
+				elif status == "Half Day":
+					total_p += 0.5
+					total_a += 0.5
+	
 		row += [total_p, total_a]
 		data.append(row)
-
+	
 	return columns, data
 
 def get_columns(filters):
 	columns = [
-		_("Employee") + ":Link/Employee:120", _("Employee Name") + "::140", _("Branch")+ ":Link/Branch:120",
-		_("Department") + ":Link/Department:120", _("Designation") + ":Link/Designation:120",
-		 _("Company") + ":Link/Company:120"
+		_("Employee") + ":Link/Employee:120", _("Employee Name") + "::140", _("Date of Joining")+ "::120"
 	]
 
+	today = getdate()
 	for day in range(filters["total_days_in_month"]):
+		dateassessed = date(cint(filters.year), filters.month, day + 1)
+		
+		if (dateassessed > today):
+			break
+			
 		columns.append(cstr(day+1) +"::20")
 
 	columns += [_("Total Present") + ":Float:80", _("Total Absent") + ":Float:80"]
@@ -76,23 +98,41 @@ def get_conditions(filters):
 		"Dec"].index(filters.month) + 1
 
 	filters["total_days_in_month"] = monthrange(cint(filters.year), filters.month)[1]
-
+	filters["month_startdate"] = date(cint(filters.year), filters.month, 1)
+	filters["month_end_date"] = date(cint(filters.year), filters.month, filters["total_days_in_month"])
+	
 	conditions = " and month(att_date) = %(month)s and year(att_date) = %(year)s"
 
-	if filters.get("company"): conditions += " and company = %(company)s"
 	if filters.get("employee"): conditions += " and employee = %(employee)s"
 
 	return conditions, filters
 
-def get_employee_details():
+def get_employee_details(filters):
 	emp_map = frappe._dict()
 	for d in frappe.db.sql("""select name, employee_name, designation,
-		department, branch, company
-		from tabEmployee""", as_dict=1):
+		department, branch, company, date_of_joining, relieving_date
+		from tabEmployee where ((date_of_joining <= %(start)s) or (date_of_joining between %(start)s and %(end)s)) 
+			and ((relieving_date is null) or ((relieving_date >= %(end)s) or (relieving_date between %(start)s and %(end)s)))""", 
+		{ "start": filters["month_startdate"], "end": filters["month_end_date"] }, as_dict=1):
 		emp_map.setdefault(d.name, d)
 
 	return emp_map
 
+def get_holidays(filters):
+	
+	holiday_filter = {"holiday_date": (">=", filters["month_startdate"]),
+				"holiday_date": ("<=", filters["month_end_date"])}
+		
+	holidays = frappe.get_all("Holiday", fields=["holiday_date"],
+				filters=holiday_filter)
+
+	holidays_list = []
+
+	for holiday in holidays:
+		holidays_list.append(holiday.holiday_date)
+		
+	return holidays_list
+	
 @frappe.whitelist()
 def get_attendance_years():
 	year_list = frappe.db.sql_list("""select distinct YEAR(att_date) from tabAttendance ORDER BY YEAR(att_date) DESC""")

@@ -23,14 +23,6 @@ frappe.query_reports["Monthly Attendance Sheet"] = {
 			"label": __("Employee"),
 			"fieldtype": "Link",
 			"options": "Employee"
-		},
-		{
-			"fieldname":"company",
-			"label": __("Company"),
-			"fieldtype": "Link",
-			"options": "Company",
-			"default": frappe.defaults.get_user_default("Company"),
-			"reqd": 1
 		}
 	],
 
