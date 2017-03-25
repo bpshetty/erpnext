@@ -39,23 +39,17 @@ frappe.ui.form.on("Timesheet", {
 	},
 
 	refresh: function(frm) {
-
+		get_attendance_data(frm);
 	},
 
 	timesheet_date: function(frm){
-		frappe.call({
-			method: "erpnext.projects.doctype.timesheet.timesheet.get_attendance_data",
-			args: {
-				employee: frm.doc.employee,
-				att_date: frm.doc.timesheet_date
-			},
-			callback: function(r){
-				if(r.message){
-					frappe.model.set_value('total_att_hours', r.message['total_attendance_hours']);
-				}
-			}
-		})
+		get_attendance_data(frm);
+	},
+	
+	employee: function(frm){
+		get_attendance_data(frm);
 	}
+	
 })
 
 frappe.ui.form.on("Timesheet Detail", {
@@ -64,7 +58,7 @@ frappe.ui.form.on("Timesheet Detail", {
 	},
 
 	hours: function(frm, cdt, cdn) {
-		calculate_time_and_amount(frm)
+		calculate_time_and_amount(frm);
 	}
 });
 
@@ -78,4 +72,22 @@ var calculate_time_and_amount = function(frm) {
 	}
 
 	cur_frm.set_value("total_hours", total_working_hr);
+}
+
+var get_attendance_data = function(frm) {
+	if (!frm.doc.employee || !frm.doc.timesheet_date)
+		return;
+	
+	frappe.call({
+		method: "erpnext.projects.doctype.timesheet.timesheet.get_attendance_data",
+		args: {
+			employee: frm.doc.employee,
+			att_date: frm.doc.timesheet_date
+		},
+		callback: function(r){
+			if(r.message){
+				cur_frm.set_value('total_att_hours', r.message['total_att_hours']);
+			}
+		}
+	});
 }

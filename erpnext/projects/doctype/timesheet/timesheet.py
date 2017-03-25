@@ -41,7 +41,7 @@ class Timesheet(Document):
 		total_timesheet_hours = self.total_hours
 		
 		if (total_timesheet_hours > total_attendance_hours):
-			frappe.throw(_("Total hours entered against all activities for {0} is greater than your Total working hours for the day.").format(self.timesheet_date))
+			frappe.throw(_("Total hours entered against all activities for {0} is greater than your Total Attendance hours for the day.").format(self.timesheet_date))
 	
 	def onload(self):
 		self.get("__onload").maintain_bill_work_hours_same = frappe.db.get_single_value('HR Settings', 'maintain_bill_work_hours_same')
@@ -105,8 +105,7 @@ def get_projectwise_timesheet_data(project, parent=None):
 		cond = "and parent = %(parent)s"
 
 	return frappe.db.sql("""select name, parent, hours 
-			from `tabTimesheet Detail` where docstatus=1 and project = %(project)s {0} and billable = 1
-			and sales_invoice is null""".format(cond), {'project': project, 'parent': parent}, as_dict=1)
+			from `tabTimesheet Detail` where docstatus=1 and project = %(project)s {0}""".format(cond), {'project': project, 'parent': parent}, as_dict=1)
 
 @frappe.whitelist()
 def get_timesheet(doctype, txt, searchfield, start, page_len, filters):
@@ -173,20 +172,24 @@ def set_missing_values(time_sheet, target):
 	target.posting_date = doc.modified
 
 @frappe.whitelist()
-def get_attendance_data(employee, att_date):
-	att_data = frappe.db.get_values("Attendance", {"employee": employee,
-									"att_date": att_date}, ["swipe_in_time", "swipe_out_time"], as_dict=True)
-	if att_data:
-		swipe_in_time = att_data[0].swipe_in_time
-		swipe_out_time = att_data[0].swipe_out_time
-		
-		today = nowdate()
-		if getdate(att_date) == getdate(today):
-			swipe_out_time = nowtime()
+def get_attendance_data(employee=None, att_date=None):
+	if (employee and att_date):
+				
+		att_data = frappe.db.get_values("Attendance", {"employee": employee,
+										"att_date": att_date}, ["swipe_in_time", "swipe_out_time"], as_dict=True)
+		if att_data:
+			swipe_in_time = att_data[0].swipe_in_time
+			swipe_out_time = att_data[0].swipe_out_time
 			
-		total_attendance_hours = round(float((to_timedelta(swipe_out_time) - to_timedelta(swipe_in_time)).total_seconds()) / 3600, 2)
+			today = nowdate()
+			if getdate(att_date) == getdate(today):
+				swipe_out_time = nowtime()
+				
+			total_attendance_hours = round(float((to_timedelta(swipe_out_time) - to_timedelta(swipe_in_time)).total_seconds()) / 3600, 2)
 
-	return {total_attendance_hours} if att_data else {}
+		return {'total_att_hours': total_attendance_hours} if att_data else {}
+		
+	return {}
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):

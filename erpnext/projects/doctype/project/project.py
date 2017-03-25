@@ -170,8 +170,8 @@ class Project(Document):
 		
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
-	return dict(frappe.db.sql('''select unix_timestamp(T.timesheet_date), count(TD.*)
-			from ``tabTimesheet` T, `tabTimesheet Detail` TD 
+	return dict(frappe.db.sql('''select unix_timestamp(T.timesheet_date), count(TD.name)
+			from `tabTimesheet` T, `tabTimesheet Detail` TD 
 			where TD.parent = T.name and project=%s 
 			and T.timesheet_date > date_sub(curdate(), interval 1 year)
 			and T.docstatus < 2

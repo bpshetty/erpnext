@@ -1,7 +1,7 @@
 frappe.views.calendar["Timesheet"] = {
 	field_map: {
-		"start": "start_date",
-		"end": "end_date",
+		"start": "timesheet_date",
+		"end": "timesheet_date",
 		"name": "parent",
 		"id": "name",
 		"title": "name",
