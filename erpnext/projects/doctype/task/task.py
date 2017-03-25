@@ -64,19 +64,14 @@ class Task(Document):
 		self.reschedule_dependent_tasks()
 		self.update_project()
 
-	def update_total_expense_claim(self):
-		self.total_expense_claim = frappe.db.sql("""select sum(total_sanctioned_amount) from `tabExpense Claim`
-			where project = %s and task = %s and approval_status = "Approved" and docstatus=1""",(self.project, self.name))[0][0]
-
-	def update_time_and_costing(self):
-		tl = frappe.db.sql("""select min(from_time) as start_date, max(to_time) as end_date,
-			sum(billing_amount) as total_billing_amount, sum(costing_amount) as total_costing_amount,
-			sum(hours) as time from `tabTimesheet Detail` where task = %s and docstatus=1"""
+	def update_actual_dates(self):
+		tl = frappe.db.sql("""select min(T.timesheet_date) as start_date, 
+							max(T.timesheet_date) as end_date, sum(TD.hours) as time 
+							from `tabTimesheet` T, `tabTimesheet Detail` TD 
+							where TD.parent = T.name and TD.task = %s and T.docstatus=1"""
 			,self.name, as_dict=1)[0]
 		if self.status == "Open":
 			self.status = "Working"
-		self.total_costing_amount= tl.total_costing_amount
-		self.total_billing_amount= tl.total_billing_amount
 		self.actual_time= tl.time
 		self.act_start_date= tl.start_date
 		self.act_end_date= tl.end_date

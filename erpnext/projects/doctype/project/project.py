@@ -96,11 +96,11 @@ class Project(Document):
 			frappe.delete_doc("Task", t.name)
 
 		self.update_percent_complete()
-		self.update_costing()
+		self.update_actual_dates()
 
 	def update_project(self):
 		self.update_percent_complete()
-		self.update_costing()
+		self.update_actual_dates()
 		self.flags.dont_sync_tasks = True
 		self.save(ignore_permissions = True)
 
@@ -127,40 +127,19 @@ class Project(Document):
 					pct_complete += row["progress"] * row["task_weight"]
 				self.percent_complete = flt(flt(pct_complete), 2)
 
-	def update_costing(self):
+	def update_actual_dates(self):
 		from_time_sheet = frappe.db.sql("""select
-			sum(costing_amount) as costing_amount,
-			sum(billing_amount) as billing_amount,
-			min(from_time) as start_date,
-			max(to_time) as end_date,
-			sum(hours) as time
-			from `tabTimesheet Detail` where project = %s and docstatus = 1""", self.name, as_dict=1)[0]
-
-		from_expense_claim = frappe.db.sql("""select
-			sum(total_sanctioned_amount) as total_sanctioned_amount
-			from `tabExpense Claim` where project = %s and approval_status='Approved'
-			and docstatus = 1""",
+			min(T.timesheet_date) as start_date,
+			max(T.timesheet_date) as end_date,
+			sum(TD.hours) as time
+			from `tabTimesheet` T, `tabTimesheet Detail` TD 
+			where TD.parent = T.name and TD.project = %s 
+			and T.docstatus = 1""", 
 			self.name, as_dict=1)[0]
 
 		self.actual_start_date = from_time_sheet.start_date
 		self.actual_end_date = from_time_sheet.end_date
-
-		self.total_costing_amount = from_time_sheet.costing_amount
-		self.total_billing_amount = from_time_sheet.billing_amount
 		self.actual_time = from_time_sheet.time
-
-		self.total_expense_claim = from_expense_claim.total_sanctioned_amount
-
-		self.gross_margin = flt(self.total_billing_amount) - flt(self.total_costing_amount)
-
-		if self.total_billing_amount:
-			self.per_gross_margin = (self.gross_margin / flt(self.total_billing_amount)) *100
-
-	def update_purchase_costing(self):
-		total_purchase_cost = frappe.db.sql("""select sum(base_net_amount)
-			from `tabPurchase Invoice Item` where project = %s and docstatus=1""", self.name)
-
-		self.total_purchase_cost = total_purchase_cost and total_purchase_cost[0][0] or 0
 
 	def send_welcome_email(self):
 		url = get_url("/project/?name={0}".format(self.name))
@@ -191,11 +170,12 @@ class Project(Document):
 		
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
-	return dict(frappe.db.sql('''select unix_timestamp(from_time), count(*)
-		from `tabTimesheet Detail` where project=%s
-			and from_time > date_sub(curdate(), interval 1 year)
-			and docstatus < 2
-			group by date(from_time)''', name))
+	return dict(frappe.db.sql('''select unix_timestamp(T.timesheet_date), count(TD.*)
+			from ``tabTimesheet` T, `tabTimesheet Detail` TD 
+			where TD.parent = T.name and project=%s 
+			and T.timesheet_date > date_sub(curdate(), interval 1 year)
+			and T.docstatus < 2
+			group by date(T.timesheet_date)''', name))
 
 def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20):
 	return frappe.db.sql('''select distinct project.*
