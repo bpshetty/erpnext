@@ -36,6 +36,7 @@ frappe.ui.form.on("Timesheet", {
 			calculate_time_and_amount(frm);
 		}
 		if(frm.doc.__islocal) cur_frm.set_value("timesheet_date", get_today());
+		
 	},
 
 	refresh: function(frm) {
@@ -86,7 +87,7 @@ var get_attendance_data = function(frm) {
 		},
 		callback: function(r){
 			if(r.message){
-				cur_frm.set_value('total_att_hours', r.message['total_att_hours']);
+				cur_frm.fields_dict["total_attendance_hours"].wrapper.innerHTML = "<b>" + r.message['total_att_hours'] + "</b>";
 			}
 		}
 	});

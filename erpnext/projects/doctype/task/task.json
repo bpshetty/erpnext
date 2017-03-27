@@ -872,7 +872,7 @@
    "share": 0, 
    "submit": 0, 
    "user_permission_doctypes": "[\"Project\"]", 
-   "write": 0
+   "write": 1
   }
  ], 
  "quick_entry": 0, 

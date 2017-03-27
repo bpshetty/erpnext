@@ -92,7 +92,7 @@ class Timesheet(Document):
 		for data in self.time_logs:
 			if data.task:
 				task = frappe.get_doc("Task", data.task)
-				task.update_time_and_costing()
+				task.update_actual_dates()
 				task.save()
 
 			elif data.project:
