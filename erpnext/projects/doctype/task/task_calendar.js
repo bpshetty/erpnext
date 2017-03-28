@@ -6,7 +6,7 @@ frappe.views.calendar["Task"] = {
 		"start": "exp_start_date",
 		"end": "exp_end_date",
 		"id": "name",
-		"title": "subject",
+		"title": "title",
 		"allDay": "allDay"
 	},
 	gantt: true,
