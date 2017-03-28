@@ -87,7 +87,7 @@ var get_attendance_data = function(frm) {
 		},
 		callback: function(r){
 			if(r.message){
-				cur_frm.fields_dict["total_attendance_hours"].wrapper.innerHTML = "<b>" + r.message['total_att_hours'] + "</b>";
+				cur_frm.fields_dict["total_att_hours"].wrapper.innerHTML = "<b>" + r.message['total_att_hours'] + "</b>";
 			}
 		}
 	});
