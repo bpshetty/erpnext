@@ -6,7 +6,7 @@ frappe.views.calendar["Task"] = {
 		"start": "exp_start_date",
 		"end": "exp_end_date",
 		"id": "name",
-		"title": "title",
+		"title": "subject",
 		"allDay": "allDay"
 	},
 	gantt: true,
@@ -18,5 +18,7 @@ frappe.views.calendar["Task"] = {
 			"label": __("Project")
 		}
 	],
+	calendar_editable: false,
+	calendar_selectable: false,
 	get_events_method: "erpnext.projects.doctype.task.task.get_events"
 }

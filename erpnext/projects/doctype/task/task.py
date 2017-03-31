@@ -127,7 +127,7 @@ def get_events(start, end, filters=None):
 	conditions = get_event_conditions("Task", filters)
 
 	data = frappe.db.sql("""select name, exp_start_date, exp_end_date,
-		CONCAT(project, ' - ', subject) as 'title', status, project from `tabTask`
+		CONCAT(project, ' - ', subject) as 'subject', status, project from `tabTask`
 		where ((ifnull(exp_start_date, '0000-00-00')!= '0000-00-00') \
 				and (exp_start_date <= %(end)s) \
 			or ((ifnull(exp_end_date, '0000-00-00')!= '0000-00-00') \
@@ -135,7 +135,7 @@ def get_events(start, end, filters=None):
 		{conditions}""".format(conditions=conditions), {
 			"start": start,
 			"end": end
-		}, as_dict=True, update={"allDay": 0})
+		}, as_dict=True, update={"allDay": 1})
 
 	return data
 
