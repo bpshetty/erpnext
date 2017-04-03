@@ -225,7 +225,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "depends_on": "eval:(!doc.user_id)", 
+   "depends_on": "eval:(!doc.user_id && !doc.__islocal)", 
    "fieldname": "create_user", 
    "fieldtype": "Button", 
    "hidden": 0, 

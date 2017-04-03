@@ -274,8 +274,12 @@ def create_user(employee, user = None):
 
 	first_name = employee_name[0]
 
+	username = (emp.prefered_email.split("@"))[0]
+	
 	user = frappe.new_doc("User")
 	user.update({
+		"user_source": "LDAP",
+		"username": username,
 		"name": emp.employee_name,
 		"email": emp.prefered_email,
 		"enabled": 1,
