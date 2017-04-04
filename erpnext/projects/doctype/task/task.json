@@ -194,7 +194,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "columns": 0, 
    "fieldname": "exp_start_date", 
@@ -910,6 +910,6 @@
  "sort_order": "ASC", 
  "timeline_field": "project", 
  "title_field": "subject", 
- "track_changes": 0, 
+ "track_changes": 1, 
  "track_seen": 1
 }
