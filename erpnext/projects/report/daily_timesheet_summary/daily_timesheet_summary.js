@@ -4,14 +4,8 @@
 frappe.query_reports["Daily Timesheet Summary"] = {
 	"filters": [
 		{
-			"fieldname":"from_date",
-			"label": __("From Date"),
-			"fieldtype": "Date",
-			"default": frappe.datetime.get_today()
-		},
-		{
-			"fieldname":"to_date",
-			"label": __("To Date"),
+			"fieldname":"timesheet_date",
+			"label": __("Date"),
 			"fieldtype": "Date",
 			"default": frappe.datetime.get_today()
 		},
