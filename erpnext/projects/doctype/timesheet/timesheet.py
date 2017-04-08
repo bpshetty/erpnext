@@ -25,7 +25,7 @@ class Timesheet(Document):
 			frappe.throw(_("Timesheet for employee {0} on {1} already exists in the system.").format(self.employee_name, self.timesheet_date))
 
 	def validate_time_against_attendance(self):
-		attendance = frappe.db.sql("""select swipe_in_time, swipe_out_time from `tabAttendance` where employee = %s and att_date = %s and docstatus < 2""",
+		attendance = frappe.db.sql("""select swipe_in_time, swipe_out_time from `tabAttendance` where employee = %s and timesheet_date = %s and docstatus < 2""",
 							(self.employee, self.timesheet_date), as_dict=True)
 		if not attendance:
 			frappe.throw(_("Attendance data for employee {0} on {1} does not exists in the system, hence cannot save this timesheet.").format(self.employee_name, self.timesheet_date))
@@ -172,17 +172,17 @@ def set_missing_values(time_sheet, target):
 	target.posting_date = doc.modified
 
 @frappe.whitelist()
-def get_attendance_data(employee=None, att_date=None):
-	if (employee and att_date):
+def get_attendance_data(employee=None, timesheet_date=None):
+	if (employee and timesheet_date):
 				
 		att_data = frappe.db.get_values("Attendance", {"employee": employee,
-										"att_date": att_date}, ["swipe_in_time", "swipe_out_time"], as_dict=True)
+										"timesheet_date": timesheet_date}, ["swipe_in_time", "swipe_out_time"], as_dict=True)
 		if att_data:
 			swipe_in_time = att_data[0].swipe_in_time
 			swipe_out_time = att_data[0].swipe_out_time
 			
 			today = nowdate()
-			if getdate(att_date) == getdate(today):
+			if getdate(timesheet_date) == getdate(today):
 				swipe_out_time = nowtime()
 				
 			total_attendance_hours = round(float((to_timedelta(swipe_out_time) - to_timedelta(swipe_in_time)).total_seconds()) / 3600, 2)

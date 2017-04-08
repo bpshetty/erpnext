@@ -12,9 +12,6 @@
  "page_name": "team-updates", 
  "roles": [
   {
-   "role": "Employee"
-  }, 
-  {
    "role": "System Manager"
   }
  ], 
