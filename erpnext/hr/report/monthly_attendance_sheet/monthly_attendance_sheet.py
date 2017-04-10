@@ -20,9 +20,9 @@ def execute(filters=None):
 	data = []
 	for emp in sorted(emp_map):
 		emp_det = emp_map.get(emp)
-		att_det = att_map.get(emp)
+		emp_att_det = att_map.get(emp)
 		
-		if not att_det:
+		if not emp_att_det:
 			continue
 		
 		row = [emp, emp_det.employee_name, emp_det.date_of_joining]
@@ -38,19 +38,28 @@ def execute(filters=None):
 			if (dateassessed > today):
 				break
 
-			status = att_det.get(day + 1, "Absent")
-			if (status == "Absent" and (dateassessed in holidays_list)):
-				status = "Holiday"
-			elif ((date_of_joining and dateassessed < date_of_joining) or (relieving_date and dateassessed > relieving_date)):
-				status = "None"
+			att_det = emp_att_det.get(day + 1)
+			if (not att_det):
+				if (dateassessed in holidays_list):
+					status = "Holiday"
+				elif ((date_of_joining and dateassessed < date_of_joining) or (relieving_date and dateassessed > relieving_date)):
+					status = "None"
+				elif (is_leaveapplied(emp, dateassessed)):
+					status = "On Leave"
+				else:
+					status = "Absent"
 			else:
-				if (is_leaveapplied(emp, dateassessed)):
-					status == "On Leave"
-			
+				status = att_det["status"]
+				if (status == "Present"):
+					if (att_det["total_time"].seconds < 14400):
+						status = "Absent"
+					elif (att_det["total_time"].seconds >= 14400 and att_det["total_time"].seconds <= 25200):
+						status = "Half Day"
+					
 			status_map = {"Present": "P", "Absent": "A", "Half Day": "H", "On Leave": "L", "Holiday": "HL", "None": ""}
 			row.append(status_map[status])
 
-			if status == "Present":
+			if (status == "Present" or status == "Holiday"):
 				total_p += 1
 			elif status == "Absent":
 				total_a += 1
@@ -85,13 +94,13 @@ def get_columns(filters):
 
 def get_attendance_list(conditions, filters):
 	attendance_list = frappe.db.sql("""select employee, day(attendance_date) as day_of_month,
-		status from tabAttendance where docstatus = 1 %s order by employee, attendance_date""" %
+		status, swipe_in_time, swipe_out_time from tabAttendance where docstatus = 1 %s order by employee, attendance_date""" %
 		conditions, filters, as_dict=1)
 
 	att_map = {}
 	for d in attendance_list:
 		att_map.setdefault(d.employee, frappe._dict()).setdefault(d.day_of_month, "")
-		att_map[d.employee][d.day_of_month] = d.status
+		att_map[d.employee][d.day_of_month] = { "status": d.status, "total_time": d.swipe_out_time - d.swipe_in_time }
 
 	return att_map
 
