@@ -20,11 +20,10 @@ def execute(filters=None):
 	data = []
 	for emp in sorted(emp_map):
 		emp_det = emp_map.get(emp)
-		
-		if not emp_det:
-			continue
-			
 		att_det = att_map.get(emp)
+		
+		if not att_det:
+			continue
 		
 		row = [emp, emp_det.employee_name, emp_det.date_of_joining]
 		
@@ -38,29 +37,28 @@ def execute(filters=None):
 			
 			if (dateassessed > today):
 				break
-				
-			if ((date_of_joining and dateassessed < date_of_joining) or (relieving_date and dateassessed > relieving_date)):
-				row.append("")
-			elif not att_det:
-				if (dateassessed in holidays_list):
-					row.append("HL")
-				else:
-					total_a += 1
-					row.append("A")
-			else:
-				status = att_det.get(day + 1, "Absent")
-				status_map = {"Present": "P", "Absent": "A", "Half Day": "H", "On Leave": "L", "None": ""}
-				row.append(status_map[status])
 
-				if status == "Present":
-					total_p += 1
-				elif status == "Absent":
-					total_a += 1
-				elif status == "On Leave":
-					total_l += 1	
-				elif status == "Half Day":
-					total_p += 0.5
-					total_a += 0.5
+			status = att_det.get(day + 1, "Absent")
+			if (status == "Absent" and (dateassessed in holidays_list)):
+				status = "Holiday"
+			elif ((date_of_joining and dateassessed < date_of_joining) or (relieving_date and dateassessed > relieving_date)):
+				status = "None"
+			else:
+				if (is_leaveapplied(emp, dateassessed)):
+					status == "On Leave"
+			
+			status_map = {"Present": "P", "Absent": "A", "Half Day": "H", "On Leave": "L", "Holiday": "HL", "None": ""}
+			row.append(status_map[status])
+
+			if status == "Present":
+				total_p += 1
+			elif status == "Absent":
+				total_a += 1
+			elif status == "On Leave":
+				total_l += 1	
+			elif status == "Half Day":
+				total_p += 0.5
+				total_a += 0.5
 	
 		row += [total_p, total_l, total_a]
 
@@ -139,6 +137,13 @@ def get_holidays(filters):
 		holidays_list.append(holiday.holiday_date)
 		
 	return holidays_list
+
+def is_leaveapplied(employee, dateassessed):
+	leave_app_filter = [["from_date", ">=", dateassessed], ["to_date", "<=", dateassessed], ["half_day", "=", "0"], ["employee", "=", employee], ["docstatus", "=", "1"]]
+		
+	leave_app_data = frappe.get_list("Leave Application", "name", filters=leave_app_filter)
+
+	return True if leave_app_data else False
 	
 @frappe.whitelist()
 def get_attendance_years():
