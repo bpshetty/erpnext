@@ -261,7 +261,7 @@
    "print": 0, 
    "read": 1, 
    "report": 0, 
-   "role": "HR Manager", 
+   "role": "System Manager", 
    "set_user_permissions": 0, 
    "share": 0, 
    "submit": 0, 
