@@ -192,7 +192,7 @@ def get_timeline_data(doctype, name):
 			and T.docstatus < 2
 			group by date(T.timesheet_date)''', name))
 
-def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20):
+def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by="modified"):
 	return frappe.db.sql('''select distinct project.*
 		from tabProject project, `tabProject User` project_user
 		where

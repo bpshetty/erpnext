@@ -81,7 +81,7 @@ def create_fiscal_year_and_company(args):
 			'default_currency':args.get('currency'),
 			'country': args.get('country'),
 			'create_chart_of_accounts_based_on': 'Standard Template',
-			'chart_of_accounts': args.get(('chart_of_accounts')),
+			'chart_of_accounts': args.get('chart_of_accounts'),
 			'domain': args.get('domain')
 		}).insert()
 
@@ -599,5 +599,3 @@ def create_room(args):
 				room.save()
 			except frappe.DuplicateEntryError:
 				pass
-
-
