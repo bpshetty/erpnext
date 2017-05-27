@@ -13,8 +13,7 @@ app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/bpshetty/erpnext"
 
 error_report_email = "manager@ixiasolutions.com"
-develop_version = '8.0.0-beta'
-
+develop_version = '8.x.x-beta'
 
 app_include_js = "assets/js/erpnext.min.js"
 app_include_css = "assets/css/erpnext.css"
