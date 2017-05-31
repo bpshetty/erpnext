@@ -6,12 +6,31 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this._super();
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function(frm, cdt, cdn) {
 			var item = frappe.get_doc(cdt, cdn);
+			var has_margin_field = frappe.meta.has_field(cdt, 'margin_type');
+
 			frappe.model.round_floats_in(item, ["rate", "price_list_rate"]);
 
 			if(item.price_list_rate) {
-				item.discount_percentage = flt((1 - item.rate / item.price_list_rate) * 100.0, precision("discount_percentage", item));
+				if(item.rate > item.price_list_rate && has_margin_field) {
+					// if rate is greater than price_list_rate, set margin
+					// or set discount
+					item.discount_percentage = 0;
+					item.margin_type = 'Amount';
+					item.margin_rate_or_amount = flt(item.rate - item.price_list_rate, 
+						precision("margin_rate_or_amount", item));
+					item.rate_with_margin = item.rate;
+				} else {
+					item.discount_percentage = flt((1 - item.rate / item.price_list_rate) * 100.0, 
+						precision("discount_percentage", item));
+					item.margin_type = '';
+					item.margin_rate_or_amount = 0;
+					item.rate_with_margin = 0;
+				}
 			} else {
 				item.discount_percentage = 0.0;
+				item.margin_type = '';
+				item.margin_rate_or_amount = 0;
+				item.rate_with_margin = 0;
 			}
 
 			cur_frm.cscript.set_gross_profit(item);
@@ -974,20 +993,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	get_terms: function() {
 		var me = this;
-		if(this.frm.doc.tc_name) {
-			return frappe.call({
-				method: 'erpnext.setup.doctype.terms_and_conditions.terms_and_conditions.get_terms_and_conditions',
-				args: {
-					template_name: this.frm.doc.tc_name,
-					doc: this.frm.doc
-				},
-				callback: function(r) {
-					if(!r.exc) {
-						me.frm.set_value("terms", r.message);
-					}
-				}
-			});
-		}
+
+		erpnext.utils.get_terms(this.frm.doc.tc_name, this.frm.doc, function(r) {
+			if(!r.exc) {
+				me.frm.set_value("terms", r.message);
+			}
+		});
 	},
 
 	taxes_and_charges: function() {
