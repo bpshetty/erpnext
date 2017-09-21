@@ -29,16 +29,17 @@ def get_columns():
 		_("Date") + "::100",
 		_("In Time") + "::100",
 		_("Out Time") + "::100",
-		_("Total Time") + "::100"
+		_("Total Time") + "::100",
+		_("Status") + "::100"
 	]
 
 def get_attendance(filters):
-	attendance_filter = [["attendance_date", ">=", filters.from_date], ["attendance_date", "<=", filters.to_date]]
+	conditions = " attendance_date between %(from_date)s and %(to_date)s "
 
-	if filters.employee:
-		attendance_filter["employee"] = filters.employee
-		
-	attendance_data = frappe.get_list("Attendance", fields=["name", "attendance_date", "employee", "employee_name", "swipe_in_time", "swipe_out_time"], filters=attendance_filter)
+	if filters.get("employee"): conditions += " and employee = %(employee)s "
+	
+	attendance_data = frappe.db.sql("""select name, attendance_date, employee, employee_name, swipe_in_time, swipe_out_time, status 
+										from tabAttendance where %s order by attendance_date desc""" %conditions, filters, as_dict=1)
 
 	return attendance_data
 	

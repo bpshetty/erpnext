@@ -13,5 +13,16 @@
  "owner": "Administrator", 
  "ref_doctype": "Attendance", 
  "report_name": "Attendance Report", 
- "report_type": "Script Report"
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "System Manager"
+  }, 
+  {
+   "role": "HR User"
+  }, 
+  {
+   "role": "Accounts User"
+  }
+ ]
 }

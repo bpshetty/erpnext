@@ -50,10 +50,12 @@ def execute(filters=None):
 					status = "Absent"
 			else:
 				status = att_det["status"]
+				if (status == "Approved"):
+					status = "Present";
 				if (status == "Present"):
 					if (att_det["total_time"].seconds < 14400):
 						status = "Absent"
-					elif (att_det["total_time"].seconds >= 14400 and att_det["total_time"].seconds <= 25200):
+					elif (att_det["total_time"].seconds >= 14400 and att_det["total_time"].seconds <= 30600):
 						status = "Half Day"
 					
 			status_map = {"Present": "P", "Absent": "A", "Half Day": "H", "On Leave": "L", "Holiday": "HL", "None": ""}
